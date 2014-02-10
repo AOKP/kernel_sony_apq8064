@@ -2562,14 +2562,11 @@ static int synaptics_clearpad_input_init(struct synaptics_clearpad *this)
 		input_free_device(this->input);
 		goto exit;
 	}
-
-	if (this->evgen_blocks) {
-		rc = device_create_file(&this->input->dev,
-				&clearpad_wakeup_gesture_attr);
-		if (rc)
-			dev_err(&this->pdev->dev,
-				"sysfs_create_file failed: %d\n", rc);
-	}
+	device_create_file(&this->input->dev,
+					&clearpad_wakeup_gesture_attr);
+	if (rc)
+		dev_err(&this->pdev->dev,
+			"sysfs_create_file failed: %d\n", rc);
 exit:
 	return rc;
 }
