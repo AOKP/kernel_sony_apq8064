@@ -2324,6 +2324,9 @@ static ssize_t synaptics_clearpad_state_show(struct device *dev,
 		PAGE_SIZE))
 		snprintf(buf, PAGE_SIZE, "%d",
 			this->easy_wakeup_config.gesture_enable);
+	else if (!strncmp(attr->attr.name, __stringify(pen), PAGE_SIZE))
+		snprintf(buf, PAGE_SIZE,
+			"%d", this->pen_enabled);
 	else
 		snprintf(buf, PAGE_SIZE, "illegal sysfs file");
 	return strnlen(buf, PAGE_SIZE);
