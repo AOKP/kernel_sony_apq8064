@@ -2324,6 +2324,9 @@ static ssize_t synaptics_clearpad_state_show(struct device *dev,
 		PAGE_SIZE))
 		snprintf(buf, PAGE_SIZE, "%d",
 			this->easy_wakeup_config.gesture_enable);
+	else if (!strncmp(attr->attr.name, __stringify(pen), PAGE_SIZE))
+		snprintf(buf, PAGE_SIZE,
+			"%d", this->pen_enabled);
 	else
 		snprintf(buf, PAGE_SIZE, "illegal sysfs file");
 	return strnlen(buf, PAGE_SIZE);
@@ -2444,6 +2447,24 @@ end:
 	return strnlen(buf, PAGE_SIZE);
 }
 
+static ssize_t synaptics_clearpad_pen_enabled_store(struct device *dev,
+		struct device_attribute *attr,
+		const char *buf, size_t size)
+{
+	struct synaptics_clearpad *this = dev_get_drvdata(dev);
+	int rc = 0;
+
+	dev_dbg(&this->pdev->dev, "%s: start\n", __func__);
+
+	LOCK(this);
+	this->pen_enabled = sysfs_streq(buf, "1");
+	rc = synaptics_clearpad_set_pen(this);
+	if (rc)
+		dev_err(&this->pdev->dev, "%s failed\n", __func__);
+	UNLOCK(this);
+	return rc ? rc : strnlen(buf, PAGE_SIZE);
+}
+
 static ssize_t synaptics_clearpad_wakeup_gesture_store(struct device *dev,
 		struct device_attribute *attr,
 		const char *buf, size_t size)
@@ -2479,6 +2500,8 @@ static struct device_attribute clearpad_sysfs_attrs[] = {
 	__ATTR(fwflush, S_IWUSR, 0, synaptics_clearpad_fwflush_store),
 	__ATTR(touchcmd, S_IWUSR, 0, synaptics_clearpad_touchcmd_store),
 	__ATTR(enabled, S_IWUSR, 0, synaptics_clearpad_enabled_store),
+	__ATTR(pen, S_IRUGO | S_IWUSR, synaptics_clearpad_state_show,
+				synaptics_clearpad_pen_enabled_store),
 };
 
 static struct device_attribute clearpad_wakeup_gesture_attr =
